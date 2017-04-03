@@ -994,6 +994,68 @@ namespace Server.Mobiles
         public virtual bool IsMilitiaFighter { get { return false; } }
 
         // Opposition List stuff
+        public enum OppositionType
+        {
+            None,
+            Terathan,
+            Ophidian,
+            Savage,
+            Orc,
+            Fey,
+            Undead,
+            GrayGoblin,
+            GreenGoblin
+        }
+
+        public virtual OppositionType OppositionList{ get{ return OppositionType.None ; } } // What opposition list am I in?
+
+        private static readonly Tuple<OppositionType, OppositionType>[] TribeConflicts =
+            new Tuple<OppositionType, OppositionType>[]
+        {
+            Tuple.Create(OppositionType.Terathan, OppositionType.Ophidian),
+            Tuple.Create(OppositionType.Savage, OppositionType.Orc),
+            Tuple.Create(OppositionType.Fey, OppositionType.Undead),
+            Tuple.Create(OppositionType.GrayGoblin, OppositionType.GreenGoblin)
+        };
+
+        private Dictionary<OppositionType, ISet<OppositionType>> m_TribeTable;
+
+        public Dictionary<OppositionType, ISet<OppositionType>> TribeTable
+        {
+            get
+            {
+                if (m_TribeTable == null)
+                {
+                    m_TribeTable = new Dictionary<OppositionType, ISet<OppositionType>>();
+
+                    foreach (var tribeConflict in TribeConflicts)
+                    {
+                        ISet<OppositionType> conflicts;
+                        if (m_TribeTable.ContainsKey(tribeConflict.Item1))
+                        {
+                            conflicts = m_TribeTable[tribeConflict.Item1];
+                        }
+                        else
+                        {
+                            conflicts = m_TribeTable[tribeConflict.Item1] = new HashSet<OppositionType>();
+                        }
+                        conflicts.Add(tribeConflict.Item2);
+
+                        ISet<OppositionType> conflicts2;
+                        if (m_TribeTable.ContainsKey(tribeConflict.Item2))
+                        {
+                            conflicts2 = m_TribeTable[tribeConflict.Item2];
+                        }
+                        else
+                        {
+                            conflicts2 = m_TribeTable[tribeConflict.Item2] = new HashSet<OppositionType>();
+                        }
+                        conflicts2.Add(tribeConflict.Item1);
+                    }
+                }
+                return m_TribeTable;
+            }
+        }
 /*
         private bool m_HasFoughtPlayer;
 
@@ -1008,23 +1070,15 @@ namespace Server.Mobiles
             }
         }
 */
-        public virtual OppositionType OppositionList{ get{ return OppositionType.None ; } } // What opposition list am I in?
-
-        public enum OppositionType
+        private bool OppositionListEnemy(Mobile m)
         {
-            None,
-            Terathan,
-            Ophidian,
-            Savage,
-            Orc,
-            Fey,
-            Undead,
-            GrayGoblin,
-            GreenGoblin
-        }
-
-        public virtual bool OppositionListEnemy(Mobile m)
-        {
+/*
+            // Don't fight monsters after fighting players, until sector deactivate/server restart
+            if (HasFoughtPlayer)
+            {
+                return false;
+            }
+*/
             // Target must be BaseCreature
             if (!(m is BaseCreature))
             {
@@ -1033,125 +1087,12 @@ namespace Server.Mobiles
 
             BaseCreature c = (BaseCreature)m;
 
-            // Target must have an OppositionType
-            if (c.OppositionList == OppositionType.None)
+            if (!TribeTable.ContainsKey(OppositionList))
             {
                 return false;
             }
 
-            // Pick my OppositionType
-            switch (OppositionList)
-            {
-                case OppositionType.Terathan: return m_TerathanEnemy(c.OppositionList);
-                case OppositionType.Ophidian: return m_OphidianEnemy(c.OppositionList);
-                case OppositionType.Savage: return m_SavageEnemy(c.OppositionList);
-                case OppositionType.Orc: return m_OrcEnemy(c.OppositionList);
-                case OppositionType.Fey: return m_FeyEnemy(c.OppositionList);
-                case OppositionType.Undead: return m_UndeadEnemy(c.OppositionList);
-                case OppositionType.GrayGoblin: return m_GrayGoblinEnemy(c.OppositionList);
-                case OppositionType.GreenGoblin: return m_GreenGoblinEnemy(c.OppositionList);
-                default: return false;
-            }
-        }
-
-        private bool m_TerathanEnemy(OppositionType egroup)
-        {
-/*
-            // Don't fight monsters after fighting players, until sector deactivate/server restart
-            if (HasFoughtPlayer)
-            {
-                return false;
-            }
-*/
-            switch (egroup)
-            {
-                case OppositionType.Ophidian: return true;
-                default: return false;
-            }
-        }
-
-        private bool m_OphidianEnemy(OppositionType egroup)
-        {
-/*
-            // Don't fight monsters after fighting players, until sector deactivate/server restart
-            if (HasFoughtPlayer)
-            {
-                return false;
-            }
-*/
-            switch (egroup)
-            {
-                case OppositionType.Terathan: return true;
-                default: return false;
-            }
-        }
-
-        private bool m_SavageEnemy(OppositionType egroup)
-        {
-            switch (egroup)
-            {
-                case OppositionType.Orc: return true;
-                default: return false;
-            }
-        }
-
-        private bool m_OrcEnemy(OppositionType egroup)
-        {
-            switch (egroup)
-            {
-                case OppositionType.Savage: return true;
-                default: return false;
-            }
-        }
-
-        private bool m_FeyEnemy(OppositionType egroup)
-        {
-            switch (egroup)
-            {
-                case OppositionType.Undead: return true;
-                default: return false;
-            }
-        }
-
-        private bool m_UndeadEnemy(OppositionType egroup)
-        {
-            switch (egroup)
-            {
-                case OppositionType.Fey: return true;
-                default: return false;
-            }
-        }
-
-        private bool m_GrayGoblinEnemy(OppositionType egroup)
-        {
-/*
-            // Don't fight monsters after fighting players, until sector deactivate/server restart
-            if (HasFoughtPlayer)
-            {
-                return false;
-            }
-*/
-            switch (egroup)
-            {
-                case OppositionType.GreenGoblin: return true;
-                default: return false;
-            }
-        }
-
-        private bool m_GreenGoblinEnemy(OppositionType egroup)
-        {
-/*
-            // Don't fight monsters after fighting players, until sector deactivate/server restart
-            if (HasFoughtPlayer)
-            {
-                return false;
-            }
-*/
-            switch (egroup)
-            {
-                case OppositionType.GrayGoblin: return true;
-                default: return false;
-            }
+            return TribeTable[OppositionList].Contains(c.OppositionList);
         }
 
         #region Friends
