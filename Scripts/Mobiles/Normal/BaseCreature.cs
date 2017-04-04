@@ -1008,20 +1008,7 @@ namespace Server.Mobiles
 
         // Tribe Opposition stuff
         public virtual TribeType Tribe{ get{ return TribeType.None ; } } // What opposition list am I in?
-/*      Stupid-OSI behavior
-        private bool m_HasFoughtPlayer;
 
-        [CommandProperty(AccessLevel.GameMaster)]
-        public bool HasFoughtPlayer
-        {
-            get { return m_HasFoughtPlayer; }
-            set
-            {
-                m_HasFoughtPlayer = value;
-                InvalidateProperties();
-            }
-        }
-*/
         private static readonly Tuple<TribeType, TribeType>[] TribeConflicts =
             new Tuple<TribeType, TribeType>[]
         {
@@ -1072,13 +1059,6 @@ namespace Server.Mobiles
 
         private bool IsTribeEnemy(Mobile m)
         {
-/*          Stupid-OSI behavior
-            // Don't fight monsters after fighting players, until sector deactivate/server restart
-            if (HasFoughtPlayer)
-            {
-                return false;
-            }
-*/
             // Target must be BaseCreature
             if (!(m is BaseCreature))
             {
@@ -3927,13 +3907,7 @@ namespace Server.Mobiles
                     aggressor.Aggressors.Add(AggressorInfo.Create(this, aggressor, true));
                 }
             }
-/*          Stupid-OSI behavior
-            else if (!HasFoughtPlayer && (aggressor.Player ||
-                (aggressor is BaseCreature && ((BaseCreature)aggressor).GetMaster() is PlayerMobile)))
-            {
-                HasFoughtPlayer = true;
-            }
-*/
+
             OrderType ct = m_ControlOrder;
 
             if (m_AI != null)
@@ -4270,19 +4244,10 @@ namespace Server.Mobiles
             base.OnCombatantChange();
 
             Warmode = (Combatant != null && !Combatant.Deleted && Combatant.Alive);
-            if (Warmode)
+
+            if (CanFly && Warmode)
             {
-/*              Stupid-OSI behavior
-                if (!HasFoughtPlayer && (Combatant is PlayerMobile ||
-                    (Combatant is BaseCreature && ((BaseCreature)Combatant).GetMaster() is PlayerMobile)))
-                {
-                    HasFoughtPlayer = true;
-                }
-*/
-                if (CanFly)
-                {
-                    Flying = false;
-                }
+                Flying = false;
             }
         }
 
@@ -7380,9 +7345,7 @@ namespace Server.Mobiles
             {
                 m_AI.Deactivate();
             }
-/*          Stupid-OSI behavior
-            HasFoughtPlayer = false;
-*/
+
             base.OnSectorDeactivate();
         }
 
