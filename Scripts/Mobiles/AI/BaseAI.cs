@@ -49,6 +49,7 @@ namespace Server.Mobiles
         AI_Spellweaving,
         AI_Mystic,
         AI_Paladin,
+        AI_TrueMage
 	}
 
 	public enum ActionType
@@ -582,7 +583,7 @@ namespace Server.Mobiles
 
 									if (m_Mobile.CheckControlChance(e.Mobile))
 									{
-										
+
 										m_Mobile.ControlOrder = OrderType.Guard;
                                         m_Mobile.ControlTarget = null;
 									}
@@ -711,7 +712,7 @@ namespace Server.Mobiles
 									{
                                         m_Mobile.ControlOrder = OrderType.Guard;
                                         m_Mobile.ControlTarget = null;
-										
+
 									}
 
 									return;
@@ -1326,7 +1327,7 @@ namespace Server.Mobiles
 
 					if (WalkMobileRange(m_Mobile.ControlMaster, 1, bRun, 0, 1))
 					{
-						if (m_Mobile.Combatant is Mobile && !m_Mobile.Combatant.Deleted && 
+						if (m_Mobile.Combatant is Mobile && !m_Mobile.Combatant.Deleted &&
                             m_Mobile.Combatant.Alive && (!(m_Mobile.Combatant is Mobile) || !((Mobile)m_Mobile.Combatant).IsDeadBondedPet))
 						{
 							m_Mobile.Warmode = true;
@@ -2323,10 +2324,10 @@ namespace Server.Mobiles
 			{
 				d |= Direction.Running;
 			}
-            
+
 			// This makes them always move one step, never any direction changes
 			m_Mobile.Direction = d;
-            
+
 			m_NextMove += delay;
 
 			if (Core.TickCount - m_NextMove > 0)
@@ -2645,12 +2646,12 @@ namespace Server.Mobiles
 
 		/*
         *  Walk at range distance from mobile
-        * 
+        *
         *	iSteps : Number of steps
         *	bRun   : Do we run
         *	iWantDistMin : The minimum distance we want to be
         *  iWantDistMax : The maximum distance we want to be
-        * 
+        *
         */
 
 		public virtual bool WalkMobileRange(IPoint3D p, int iSteps, bool bRun, int iWantDistMin, int iWantDistMax)
@@ -2738,13 +2739,13 @@ namespace Server.Mobiles
 
 		/*
         * Here we check to acquire a target from our surronding
-        * 
+        *
         *  iRange : The range
         *  acqType : A type of acquire we want (closest, strongest, etc)
         *  bPlayerOnly : Don't bother with other creatures or NPCs, want a player
         *  bFacFriend : Check people in my faction
         *  bFacFoe : Check people in other factions
-        * 
+        *
         */
 
 		public virtual bool AcquireFocusMob(int iRange, FightMode acqType, bool bPlayerOnly, bool bFacFriend, bool bFacFoe)
@@ -2996,7 +2997,7 @@ namespace Server.Mobiles
 			return (m_Mobile.FocusMob != null);
 		}
 
-		private bool IsHostile(Mobile from)
+		public virtual bool IsHostile(Mobile from)
 		{
 			int count = Math.Max(m_Mobile.Aggressors.Count, m_Mobile.Aggressed.Count);
 
