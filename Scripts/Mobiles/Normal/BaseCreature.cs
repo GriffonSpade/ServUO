@@ -2976,6 +2976,9 @@ namespace Server.Mobiles
                 case AIType.AI_Spellbinder:
                     m_AI = new SpellbinderAI(this);
                     break;
+                case AIType.AI_TrueMage:
+                    m_AI = new TrueMageAI(this);
+                    break;
             }
         }
 
