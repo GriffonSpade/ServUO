@@ -1474,7 +1474,7 @@ namespace Server.Mobiles
         }
 
         public override void OnBeforeSpawn(Point3D location, Map m)
-        {
+        {I
             if (XmlParagon.CheckConvert(this, location, m))
             {
                 IsParagon = true;
@@ -4166,7 +4166,7 @@ namespace Server.Mobiles
 
             m_IdleReleaseTime = DateTime.UtcNow + TimeSpan.FromSeconds(Utility.RandomMinMax(15, 25));
 
-            if (Body.IsHuman)
+            if (Body.IsHuman && !Mounted && !Flying)
             {
                 switch (Utility.Random(2))
                 {
